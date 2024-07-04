@@ -1,0 +1,6 @@
+---
+- name: restart PaSSHport
+  ansible.builtin.service:
+    name: "{{ passhport_daemon }}"
+    state: restarted
+    sleep: 5
