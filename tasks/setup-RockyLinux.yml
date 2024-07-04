@@ -27,12 +27,31 @@
       - pathlib2
     state: present
 
-- name: Add passport users
+- name: Add passhport users
   ansible.builtin.user:
-    name: passport
+    name: passhport
     shell: /bin/bash
     create_home: yes
     generate_ssh_key: yes
     ssh_key_bits: 4098
     ssh_key_file: .ssh/id_rsa
   
+- name: Ensure the virtual environment exists
+  ansible.builtin.pip:
+    virtualenv: "{{ passhport_venv_dir }}"
+    virtualenv_command: "{{ ansible_python_interpreter }} -m venv"
+
+- name: Get PaSSHPort source from git
+  ansible.builtin.git:
+    repo: http://github.com/LibrIT/passhport.git
+    clone: yes
+    dest: /home/passhport/
+  become_user: passhport
+
+- name: Install PaSSHPort pip requirements
+  ansible.builtin.pip:
+    virtualenv: "{{ passhport_venv_dir }}"
+    requirements: /home/passhport/passhport/requirements.txt
+
+
+
