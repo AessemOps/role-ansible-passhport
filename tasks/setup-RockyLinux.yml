@@ -40,6 +40,7 @@
   ansible.builtin.pip:
     virtualenv: "{{ passhport_venv_dir }}"
     virtualenv_command: "{{ ansible_python_interpreter }} -m venv"
+  become_user: passhport
 
 - name: Get PaSSHPort source from git
   ansible.builtin.git:
@@ -52,6 +53,46 @@
   ansible.builtin.pip:
     virtualenv: "{{ passhport_venv_dir }}"
     requirements: /home/passhport/passhport/requirements.txt
+  become_user: passhport
 
+- name: Create Logs folder 
+  ansible.builtin.file:
+    path: /var/log/passhport/
+    state: directory
+    owner: passhport
+    group: passhport
 
+- name: Create etc folder 
+  ansible.builtin.file:
+    path: /etc/passhport/
+    state: directory
 
+- name: Copy PaSSHPort config to etc
+  ansible.builtin.copy:
+    src: /home/passhport/passhport/passhport/passhport.ini
+    dest: /etc/passhport/
+    remote_src: true
+
+- name: Copy PaSSHPort config to etc
+  ansible.builtin.copy:
+    src: /home/passhport/passhport/passhportd/passhportd.ini
+    dest: /etc/passhport/
+    remote_src: true
+
+- name: Copy PaSSHPort config to etc
+  ansible.builtin.copy:
+    src: /home/passhport/passhport/passhport-admin/passhport-admin.ini
+    dest: /etc/passhport/
+    remote_src: true
+
+- name: Modify the Listening IP
+  ansible.builtin.lineinfile:
+    path: /etc/passhport/passportd.ini
+    regexp: ^LISTENING_IP
+    line: LISTENING_IP = {{ passhport_listen_ip }}
+
+- name: Modify the Listening Port
+  ansible.builtin.lineinfile:
+    path: /etc/passhport/passportd.ini
+    regexp: ^PORT
+    line: PORT = {{ passhport_listen_port }}
